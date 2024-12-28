@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Trending page details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        #results h2 {
+            margin-bottom: 10px;
+        }
+        #results ol {
+            padding-left: 20px;
+        }
+        #results ol li {
+            margin-bottom: 5px;
+        }
+    </style>
+    <script>
+        function runScript() {
+            const resultDiv = document.getElementById('results');
+            resultDiv.innerHTML = "<p>Fetching data...</p>";
+            
+            fetch('/run-script', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Convert MongoDB timestamp to milliseconds
+                    const timestamp = new Date(data.timestamp.$date || data.timestamp);
+                    const formattedTime = timestamp.toLocaleString();
+                    
+                    resultDiv.innerHTML = `
+                        <h2>Trending Trending Topics:</h2>
+                        <ol>
+                            ${data.trends.map(headline => `<li>${headline}</li>`).join('')}
+                        </ol>
+                        <p><strong>IP address used:</strong> ${data.ip_data.ip || 'N/A'}</p>
+                        <p><strong>Script Run ID:</strong> ${data._id || 'N/A'}</p>
+                        <p><strong>Timestamp:</strong> ${formattedTime}</p>
+                    `;
+                })
+                .catch(err => {
+                    resultDiv.innerHTML = `
+                        <p style="color: red;">An error occurred while fetching the data. Please try again later.</p>
+                    `;
+                });
+        }
+    </script>
+</head>
+<body>
+    <h1>Twitter Trending Page Details</h1>
+    <button onclick="runScript()">Fetch News</button>
+    <div id="results"></div>
+</body>
+</html>
